@@ -1,9 +1,5 @@
 'use strict';
 
-function test(){
-
-}
-
 function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
     return {
         outputSpeech: {

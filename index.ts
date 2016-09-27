@@ -1,5 +1,7 @@
 'use strict';
 
+var request = require('request');
+
 function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
     return {
         outputSpeech: {
@@ -164,6 +166,7 @@ function SendMoney(intent, session, callback0){
     let shouldEndSession = false;
     let speechOutput = '';
 
+
     if (session.attributes) {
         favoriteColor = session.attributes.favoriteColor;
     }
@@ -206,6 +209,93 @@ function ShowPaymentHistory(intent, session, callback){
 }
 
 
+function ShowFirstMessage(intent, session, callback){
+    let repromptText = null;
+    let sessionAttributes = {};
+    let shouldEndSession = false;
+    let speechOutput = '';
+    let intentMessage = intent.slots.intentedMessage;
+
+    if (intentMessage) {
+        speechOutput = `I will now show the first message`;
+        let bodyText = {
+            display: intentMessage.value
+        };
+        request({
+            url:"https://ionictester162.herokuapp.com/echo/",
+            method: "POST",
+            body: bodyText,
+            json: true
+        }, function(error, response){
+            if(err) {
+                console.log(err);
+                callback(sessionAttributes,
+                    buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
+            }else{
+                console.log(response);
+                console.log("Successfully Logged Data!");
+                callback(sessionAttributes,
+                    buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
+            }
+        });
+    } else {
+        speechOutput = "Please provide the message you want";
+        callback(sessionAttributes,
+            buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
+    }
+
+}
+
+function ShowSecondMessage(intent, session, callback){
+    let favoriteColor;
+    const repromptText = null;
+    const sessionAttributes = {};
+    let shouldEndSession = false;
+    let speechOutput = '';
+
+    if (session.attributes) {
+        favoriteColor = session.attributes.favoriteColor;
+    }
+
+    if (favoriteColor) {
+        speechOutput = `Your favorite color is ${favoriteColor}. Goodbye.`;
+        shouldEndSession = true;
+    } else {
+        speechOutput = "I'm not sure what your favorite color is, you can say, my favorite color " +
+            ' is red';
+    }
+
+
+    callback(sessionAttributes,
+        buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
+}
+
+function ShowThirdMessage(intent, session, callback){
+    let favoriteColor;
+    const repromptText = null;
+    const sessionAttributes = {};
+    let shouldEndSession = false;
+    let speechOutput = '';
+
+    if (session.attributes) {
+        favoriteColor = session.attributes.favoriteColor;
+    }
+
+    if (favoriteColor) {
+        speechOutput = `Your favorite color is ${favoriteColor}. Goodbye.`;
+        shouldEndSession = true;
+    } else {
+        speechOutput = "I'm not sure what your favorite color is, you can say, my favorite color " +
+            ' is red';
+    }
+
+
+    callback(sessionAttributes,
+        buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
+}
+
+
+
 function onSessionStarted(sessionStartedRequest, session) {
     console.log(`onSessionStarted requestId=${sessionStartedRequest.requestId}, sessionId=${session.sessionId}`);
 }
@@ -238,7 +328,13 @@ function onIntent(intentRequest, session, callback) {
         SendMoney(intent, session, callback);
     }else if(intentName === 'ShowPaymentHistory'){
         ShowPaymentHistory(intent, session, callback);
-    } else if (intentName === 'AMAZON.HelpIntent') {
+    }else if (intentName === 'ShowFirstMessage') {
+        ShowFirstMessage(intent, session, callback);
+    }else if (intentName === 'ShowSecondMessage') {
+        ShowSecondMessage(intent, session, callback);
+    }else if (intentName === 'ShowThirdMessage') {
+        ShowThirdMessage(intent, session, callback);
+    }else if (intentName === 'AMAZON.HelpIntent') {
         getWelcomeResponse(callback);
     } else if (intentName === 'AMAZON.StopIntent' || intentName === 'AMAZON.CancelIntent') {
         handleSessionEndRequest(callback);
